@@ -6,7 +6,11 @@ import android.os.Bundle
 import android.hardware.SensorManager
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
+import android.media.AudioManager
+import android.media.MediaPlayer
 import android.util.Log
+import android.widget.Toast
+import java.io.IOException
 
 
 class MainActivity : AppCompatActivity(), SensorEventListener {
@@ -14,10 +18,12 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
     private val MIN_TIME_BETWEEN_SHAKES_MILLISECS = 1000
     private var mLastShakeTime: Long = 0
     private var mSensorMgr: SensorManager? = null
+    var mediaPlayer : MediaPlayer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
+        mediaPlayer = MediaPlayer.create(this, R.raw.bell_sound)
 
         mSensorMgr = getSystemService(SENSOR_SERVICE) as SensorManager?;
         val accelerometer: Sensor? = mSensorMgr!!.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
@@ -46,11 +52,14 @@ class MainActivity : AppCompatActivity(), SensorEventListener {
                 Log.d("APP_NAME", "Acceleration is " + acceleration + "m/s^2")
                 if (acceleration > SHAKE_THRESHOLD) {
                     mLastShakeTime = curTime
+                    mediaPlayer!!.start()
                     Log.d("APP_NAME", "Shake, Rattle, and Roll")
                 }
             }
         }
     }
+
+
 
     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {
         TODO("Not yet implemented")

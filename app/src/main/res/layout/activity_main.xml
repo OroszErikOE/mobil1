@@ -16,18 +16,6 @@
         app:layout_constraintTop_toTopOf="parent"
         android:src="@drawable/bell" />
 
-    <Button
-        android:id="@+id/showMenuBtn"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="show popup"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintHorizontal_bias="0.109"
-        app:layout_constraintLeft_toLeftOf="parent"
-        app:layout_constraintRight_toRightOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.95" />
-
     <ImageView
         android:id="@+id/img0"
         android:layout_width="108dp"

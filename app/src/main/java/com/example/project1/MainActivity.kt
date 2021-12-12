@@ -16,23 +16,28 @@ import kotlin.math.sqrt
 
 
 class MainActivity : AppCompatActivity() {
-    private var sensorManager: SensorManager? = null
-    private var acceleration = 0f
+    private lateinit var sensorManager: SensorManager
+    private var acceleration = 1f
     private var currentAcceleration = 0f
     private var lastAcceleration = 0f
-    private var mediaPlayer : MediaPlayer? = MediaPlayer()
-    private var isPlaying : Boolean = false
+    private lateinit var mediaPlayer: MediaPlayer
+    private var isPlaying: Boolean = false
     private lateinit var binding: ActivityMainBinding
+    private val tresHold = 1.6
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
         sensorManager = getSystemService(Context.SENSOR_SERVICE) as SensorManager
-        Objects.requireNonNull(sensorManager)?.registerListener(sensorListener, sensorManager!!
-            .getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL)
-        acceleration = 1f
+        Objects.requireNonNull(sensorManager).registerListener(
+            sensorListener, sensorManager
+                .getDefaultSensor(Sensor.TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
+        )
+
         currentAcceleration = SensorManager.GRAVITY_EARTH
         lastAcceleration = SensorManager.GRAVITY_EARTH
+        mediaPlayer = MediaPlayer.create(applicationContext, R.raw.bell_sound)
+        mediaPlayer.isLooping = true
 
     }
 
@@ -42,51 +47,66 @@ class MainActivity : AppCompatActivity() {
             val y = event.values[1]
             val z = event.values[2]
             lastAcceleration = currentAcceleration
-            currentAcceleration = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
-            val delta: Float = currentAcceleration - lastAcceleration
-            acceleration = abs(acceleration * 0.9f + delta)
-            if (acceleration > 1.6) {
+            getAceeleration(x, y, z)
+
+            if (acceleration > tresHold) {
                 if (!isPlaying) {
                     onStartAnimation()
-                    mediaPlayer = MediaPlayer.create(applicationContext, R.raw.bell_sound)
-                    mediaPlayer!!.isLooping=true
-                    mediaPlayer!!.start()
+                    media()
                     isPlaying = true
                 }
 
-            }
-            else{
-                if(isPlaying)
-                {
+            } else {
+                if (isPlaying) {
                     isPlaying = false
-                    mediaPlayer!!.stop()
+                    mediaStop()
                     onsTopAnimation()
                 }
             }
         }
+
         override fun onAccuracyChanged(sensor: Sensor, accuracy: Int) {}
     }
 
+    private fun getAceeleration(x: Float, y: Float, z: Float) {
+        currentAcceleration = sqrt((x * x + y * y + z * z).toDouble()).toFloat()
+        val delta: Float = currentAcceleration - lastAcceleration
+        acceleration = abs(acceleration * 0.9f + delta)
+    }
+
+    private fun mediaStop() {
+        mediaPlayer.stop()
+    }
+
+    private fun media() {
+
+        mediaPlayer.start()
+    }
+
     private fun onStartAnimation() {
-        val animation = AnimationUtils.loadAnimation( this.applicationContext,R.anim.shake_animation )
+        val animation =
+            AnimationUtils.loadAnimation(this.applicationContext, R.anim.shake_animation)
         binding.imageView.startAnimation(animation)
     }
+
     private fun onsTopAnimation() {
         Thread.sleep(10)
         binding.imageView.clearAnimation()
     }
 
 
-
     override fun onResume() {
-            sensorManager?.registerListener(sensorListener, sensorManager!!.getDefaultSensor(
-           Sensor .TYPE_ACCELEROMETER), SensorManager.SENSOR_DELAY_NORMAL
+        sensorManager.registerListener(
+            sensorListener, sensorManager.getDefaultSensor(
+                Sensor.TYPE_ACCELEROMETER
+            ), SensorManager.SENSOR_DELAY_NORMAL
 
         )
         super.onResume()
     }
+
     override fun onPause() {
-        sensorManager!!.unregisterListener(sensorListener)
+        sensorManager.unregisterListener(sensorListener)
         super.onPause()
     }
 }
